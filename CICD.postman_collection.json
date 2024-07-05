@@ -1,0 +1,632 @@
+{
+	"info": {
+		"_postman_id": "84311989-b172-43f2-984a-bc55fd552f06",
+		"name": "CICD",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24794262"
+	},
+	"item": [
+		{
+			"name": "latest commit",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var respondeseBody = pm.response.json();\r",
+							"\r",
+							"pm.environment.set(\"commitId\", respondeseBody.latestCommit.id);\r",
+							"\r",
+							"pm.execution.setNextRequest('Build package');"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.clear();\r",
+							"pm.environment.set(\"currentTimestamp\", Date.now());"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "MxToken {{Mendix-PAT}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://repository.api.mendix.com/v1/repositories/{{appguid}}/branches/{{branch}}",
+					"protocol": "https",
+					"host": [
+						"repository",
+						"api",
+						"mendix",
+						"com"
+					],
+					"path": [
+						"v1",
+						"repositories",
+						"{{appguid}}",
+						"branches",
+						"{{branch}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Build package",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var respondeseBody = pm.response.json();\r",
+							"\r",
+							"pm.environment.set(\"packageId\", respondeseBody.PackageId);\r",
+							"\r",
+							"pm.execution.setNextRequest(\"Check status of build\");"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Mendix-Username",
+						"value": "{{Mendix-Username}}",
+						"type": "text"
+					},
+					{
+						"key": "Mendix-ApiKey",
+						"value": "{{Mendix-ApiKey}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"Branch\" : \"{{branch}}\" ,\r\n     \"Revision\" :  \"{{commitId}}\",\r\n     \"Version\" :  \"{{deployVersion}}\" ,\r\n     \"Description\" :  \"Postman deploy\"\r\n}"
+				},
+				"url": {
+					"raw": "https://deploy.mendix.com/api/1/apps/{{appid}}/packages",
+					"protocol": "https",
+					"host": [
+						"deploy",
+						"mendix",
+						"com"
+					],
+					"path": [
+						"api",
+						"1",
+						"apps",
+						"{{appid}}",
+						"packages"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check status of build",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var respondeseBody = pm.response.json();\r",
+							"\r",
+							"if (respondeseBody.Status == \"Succeeded\") {\r",
+							"    pm.execution.setNextRequest(\"Transport package\");\r",
+							"} else {\r",
+							"    setTimeout(() => { pm.execution.setNextRequest(\"Check status of build\"); }, 20000);\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Mendix-Username",
+						"value": "{{Mendix-Username}}",
+						"type": "text"
+					},
+					{
+						"key": "Mendix-ApiKey",
+						"value": "{{Mendix-ApiKey}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://deploy.mendix.com/api/1/apps/{{appid}}/packages/{{packageId}}",
+					"protocol": "https",
+					"host": [
+						"deploy",
+						"mendix",
+						"com"
+					],
+					"path": [
+						"api",
+						"1",
+						"apps",
+						"{{appid}}",
+						"packages",
+						"{{packageId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transport package",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.execution.setNextRequest(\"Stop environment\");"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Mendix-Username",
+						"value": "{{Mendix-Username}}",
+						"type": "text"
+					},
+					{
+						"key": "Mendix-ApiKey",
+						"value": "{{Mendix-ApiKey}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"PackageId\" :  \"{{packageId}}\"\r\n}"
+				},
+				"url": {
+					"raw": "https://deploy.mendix.com/api/1/apps/{{appid}}/environments/Test/transport",
+					"protocol": "https",
+					"host": [
+						"deploy",
+						"mendix",
+						"com"
+					],
+					"path": [
+						"api",
+						"1",
+						"apps",
+						"{{appid}}",
+						"environments",
+						"Test",
+						"transport"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Stop environment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.execution.setNextRequest(\"Start environment\");"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Mendix-Username",
+						"value": "{{Mendix-Username}}",
+						"type": "text"
+					},
+					{
+						"key": "Mendix-ApiKey",
+						"value": "{{Mendix-ApiKey}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://deploy.mendix.com/api/1/apps/{{appid}}/environments/Test/stop",
+					"protocol": "https",
+					"host": [
+						"deploy",
+						"mendix",
+						"com"
+					],
+					"path": [
+						"api",
+						"1",
+						"apps",
+						"{{appid}}",
+						"environments",
+						"Test",
+						"stop"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Start environment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var respondeseBody = pm.response.json();\r",
+							"\r",
+							"pm.environment.set(\"jobId\", respondeseBody.JobId);\r",
+							"\r",
+							"pm.execution.setNextRequest(\"Check environment status\");"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Mendix-Username",
+						"value": "{{Mendix-Username}}",
+						"type": "text"
+					},
+					{
+						"key": "Mendix-ApiKey",
+						"value": "{{Mendix-ApiKey}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"AutoSyncDb\" :  true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://deploy.mendix.com/api/1/apps/{{appid}}/environments/Test/start/",
+					"protocol": "https",
+					"host": [
+						"deploy",
+						"mendix",
+						"com"
+					],
+					"path": [
+						"api",
+						"1",
+						"apps",
+						"{{appid}}",
+						"environments",
+						"Test",
+						"start",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check environment status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var respondeseBody = pm.response.json();\r",
+							"\r",
+							"if (respondeseBody.Status == \"Started\") {\r",
+							"    var elapsedTime = ((Date.now() - pm.environment.get(\"currentTimestamp\")) / 60000).toFixed(2);\r",
+							"    console.log(\"Started in \" + elapsedTime + \" minutes\");\r",
+							"\r",
+							"    // Run unittests if runUnittests == true\r",
+							"    if (pm.environment.get(\"runUnittests\") == \"true\") {\r",
+							"        console.log(\"Trying to start the unittests\");\r",
+							"        pm.execution.setNextRequest(\"Start Unittest\");\r",
+							"    } else {\r",
+							"        var elapsedTime = ((Date.now() - pm.environment.get(\"currentTimestamp\")) / 60000).toFixed(2);\r",
+							"        console.log(\"Deploying finished in \" + elapsedTime + \" minutes\");\r",
+							"        pm.execution.setNextRequest(null);\r",
+							"    }\r",
+							"} else {\r",
+							"    var elapsedTime = (Date.now() - pm.environment.get(\"currentTimestamp\"));\r",
+							"\r",
+							"    // If starting takes longer than 15 minutes, stop\r",
+							"    if (elapsedTime > 900000) {\r",
+							"        console.error(\"Omgeving starten is na 15 minuten niet gelukt!\");\r",
+							"        pm.execution.setNextRequest(null);\r",
+							"    } else {\r",
+							"        setTimeout(() => { pm.execution.setNextRequest(\"Check environment status\"); }, 10000);\r",
+							"    }\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Mendix-Username",
+						"value": "{{Mendix-Username}}",
+						"type": "text"
+					},
+					{
+						"key": "Mendix-ApiKey",
+						"value": "{{Mendix-ApiKey}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://deploy.mendix.com/api/1/apps/{{appid}}/environments/Test/start/{{jobId}}",
+					"protocol": "https",
+					"host": [
+						"deploy",
+						"mendix",
+						"com"
+					],
+					"path": [
+						"api",
+						"1",
+						"apps",
+						"{{appid}}",
+						"environments",
+						"Test",
+						"start",
+						"{{jobId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Start Unittest",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statuscode = pm.response.code;\r",
+							"if (statuscode == \"204\") {\r",
+							"    pm.execution.setNextRequest(\"Check Unittest status\");\r",
+							"} else {\r",
+							"    console.error(\"Failed to start unit tests. Statuscode: \" + statuscode + \" \" + pm.response.status)\r",
+							"    pm.execution.setNextRequest(null);\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"password\" : \"{{UnitTestPassword}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{AppUrl}}/unittests/start",
+					"host": [
+						"{{AppUrl}}"
+					],
+					"path": [
+						"unittests",
+						"start"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check Unittest status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var respondeseBody = pm.response.json();\r",
+							"\r",
+							"if (respondeseBody.completed !== true) {\r",
+							"    setTimeout(() => { pm.execution.setNextRequest(\"Check Unittest status\"); }, 3000);\r",
+							"} else {\r",
+							"    var elapsedTime = ((Date.now() - pm.environment.get(\"currentTimestamp\")) / 60000).toFixed(2);\r",
+							"    console.log(\"Deploying finished in \" + elapsedTime + \" minutes\");\r",
+							"    if (respondeseBody.failures == 0) {\r",
+							"        console.log(\"Unittests succeeded in \" + respondeseBody.runtime + \" milliseconds\");\r",
+							"\r",
+							"        // Run regressiontests if runRegressiontests == true\r",
+							"        if (pm.environment.get(\"runRegressiontests\") == \"true\") {\r",
+							"            console.log(\"Trying to start the regression tests\");\r",
+							"            pm.execution.setNextRequest(\"Start Regressiontest\");\r",
+							"        } else {\r",
+							"            pm.execution.setNextRequest(null);\r",
+							"        } \r",
+							"    } else {\r",
+							"        console.error(\"Number of failed tests: \" + respondeseBody.failures + \" \\n \" + JSON.stringify(respondeseBody.failed_tests))\r",
+							"        pm.environment.set(\"UnitTestGefaaldMelding\", respondeseBody);\r",
+							"        postman.setNextRequest(\"UnitTestGefaaldTeamsBericht\");\r",
+							"    }\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"password\" : \"{{UnitTestPassword}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{AppUrl}}/unittests/status",
+					"host": [
+						"{{AppUrl}}"
+					],
+					"path": [
+						"unittests",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UnitTestGefaaldTeamsBericht",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n    \"title\": \"app: {{appid}}, commit: {{commitId}}\",\r\n    \"text\": \"{{UnitTestGefaaldMelding}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{TeamsWebhook}}",
+					"host": [
+						"{{TeamsWebhook}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Start Regressiontest",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{RegressionTestURL}}",
+					"host": [
+						"{{RegressionTestURL}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
