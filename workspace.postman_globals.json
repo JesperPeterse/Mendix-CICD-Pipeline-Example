@@ -1,0 +1,39 @@
+{
+	"id": "fad7c52c-37d1-4110-8ba4-8a1cab27f745",
+	"values": [
+		{
+			"key": "Mendix-Username",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "Mendix-ApiKey",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "Mendix-PAT",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "TeamsWebhook",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "RegressionTestURL",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"name": "Globals",
+	"_postman_variable_scope": "globals",
+	"_postman_exported_at": "2024-06-21T13:11:26.393Z",
+	"_postman_exported_using": "Postman/11.2.12"
+}
