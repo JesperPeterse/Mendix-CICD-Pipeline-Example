@@ -579,9 +579,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{AppUrl}}/unittests/status",
+					"raw": "{{appURL}}/unittests/status",
 					"host": [
-						"{{AppUrl}}"
+						"{{appURL}}"
 					],
 					"path": [
 						"unittests",
