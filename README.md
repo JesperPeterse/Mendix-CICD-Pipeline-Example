@@ -1,10 +1,11 @@
 # CICD-pipeline
 
 - Download
-  - [CICD.postman_collection.json]()
-  - [workspace.postman_globals.json]()
-  - [Test.postman_environment.json]()
+  - [CICD.postman_collection.json](https://github.com/JesperPeterse/CICD-Pipeline-Example/blob/19bec679eb23017ed124ab29e2056a83af577935/CICD.postman_collection.json)
+  - [workspace.postman_globals.json](https://github.com/JesperPeterse/CICD-Pipeline-Example/blob/19bec679eb23017ed124ab29e2056a83af577935/workspace.postman_globals.json)
+  - [Test.postman_environment.json](https://github.com/JesperPeterse/CICD-Pipeline-Example/blob/19bec679eb23017ed124ab29e2056a83af577935/Test.postman_environment.json)
 - Import all in Postman
+
 
 
 ## Set up the environments
