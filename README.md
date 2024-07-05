@@ -1,4 +1,6 @@
-# CICD-pipeline
+# Mendix CICD-pipeline example
+
+This is an example of how to automatically deploy the latest version of the main line to the test-environment. It's possible to run the unit test or a regression test as well, and  send a message to MS Teams when the tests fail
 
 - Download
   - [CICD.postman_collection.json](https://github.com/JesperPeterse/CICD-Pipeline-Example/blob/19bec679eb23017ed124ab29e2056a83af577935/CICD.postman_collection.json)
