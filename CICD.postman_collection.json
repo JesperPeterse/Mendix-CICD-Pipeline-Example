@@ -518,9 +518,9 @@
 					}
 				},
 				"url": {
-					"raw": "{{AppUrl}}/unittests/start",
+					"raw": "{{appURL}}/unittests/start",
 					"host": [
-						"{{AppUrl}}"
+						"{{appURL}}"
 					],
 					"path": [
 						"unittests",
